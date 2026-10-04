@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #1e293b;
+  --primary: #0e7490;
+  --primary-dark: #0c4a6e;
+  --secondary: #0369a1;
+  --accent: #d97706;
+  --success: #059669;
+  --card: #ffffff;
+  --muted: #64748b;
+  --border: #e2e8f0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-jakarta);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+.cute-card {
+  background: var(--card);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  border: 1px solid var(--border);
+}
+
+.cute-btn {
+  background: var(--primary);
+  color: white;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.cute-btn:hover {
+  background: var(--primary-dark);
+}
+
+.cute-btn-secondary {
+  background: white;
+  color: var(--primary);
+  border: 1px solid var(--border);
+}
+
+.cute-btn-secondary:hover {
+  background: #f1f5f9;
+}
+
+.score-ring {
+  background: conic-gradient(
+    var(--primary) calc(var(--score) * 1%),
+    #e2e8f0 calc(var(--score) * 1%)
+  );
+}
+
+.section-wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--foreground);
+  letter-spacing: -0.02em;
+}
+
+.page-desc {
+  color: var(--muted);
+  font-size: 1.05rem;
+  margin-top: 0.5rem;
+  max-width: 36rem;
+}

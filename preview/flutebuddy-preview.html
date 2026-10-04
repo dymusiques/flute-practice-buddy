@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FluteBuddy · 长笛智能练习平台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --fg: #1e293b;
+      --primary: #0e7490;
+      --primary-dark: #0c4a6e;
+      --secondary: #0369a1;
+      --accent: #d97706;
+      --success: #059669;
+      --card: #ffffff;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(--bg); color: var(--fg); min-height: 100vh; }
+    .hidden { display: none !important; }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+    .wrap-wide { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+
+    /* Header */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: #fff; border-bottom: 1px solid var(--border);
+    }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .brand-icon { width: 36px; height: 36px; background: rgba(14,116,144,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .brand-name { font-weight: 700; font-size: 1.1rem; }
+    .brand-sub { font-size: 0.8rem; color: var(--muted); font-weight: 400; margin-left: 4px; }
+    .nav { display: flex; gap: 4px; }
+    .nav-btn {
+      padding: 8px 16px; border: none; background: none; cursor: pointer;
+      font-family: inherit; font-weight: 500; font-size: 0.875rem;
+      color: var(--muted); border-radius: 6px; transition: all 0.15s;
+    }
+    .nav-btn:hover { color: var(--fg); background: #f1f5f9; }
+    .nav-btn.active { background: var(--primary); color: #fff; }
+
+    /* Typography */
+    .eyebrow { font-size: 0.75rem; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+    h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
+    h1 .hl { color: var(--primary); }
+    h2 { font-size: 1.375rem; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
+    h3 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+    .lead { font-size: 1.05rem; color: var(--muted); line-height: 1.7; max-width: 32rem; }
+    .section { padding: 64px 0; }
+    .section-sm { padding: 40px 0; }
+    .section-white { background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+    /* Cards & buttons */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(15,23,42,0.04); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer;
+      font-family: inherit; font-weight: 600; font-size: 0.9375rem;
+      background: var(--primary); color: #fff; transition: background 0.15s;
+    }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-outline { background: #fff; color: var(--fg); border: 1px solid var(--border); }
+    .btn-outline:hover { background: #f8fafc; }
+    .btn-sm { padding: 8px 16px; font-size: 0.8125rem; }
+    .btn-success { background: var(--success); }
+    .btn-success:hover { background: #047857; }
+
+    /* Hero split */
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; min-height: calc(100vh - 64px - 80px); }
+    .hero-visual {
+      aspect-ratio: 4/3; border-radius: 12px; border: 1px solid var(--border);
+      background: linear-gradient(135deg, #f1f5f9, #ecfeff);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 24px; }
+    .hero-stat { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; font-size: 0.875rem; font-weight: 600; }
+
+    /* Feature grid */
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .feature-icon { width: 44px; height: 44px; background: rgba(14,116,144,0.08); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.25rem; }
+    .feature-card { cursor: pointer; transition: box-shadow 0.2s; }
+    .feature-card:hover { box-shadow: 0 4px 12px rgba(15,23,42,0.08); }
+
+    /* Page header — left aligned */
+    .page-head { padding: 48px 0 32px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+    .page-head h1 { font-size: 1.75rem; }
+
+    /* Practice layout */
+    .practice-layout { display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start; }
+    .steps { position: sticky; top: 88px; }
+    .step { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.875rem; color: var(--muted); }
+    .step-num { width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.75rem; flex-shrink: 0; }
+    .step.active .step-num { background: var(--primary); color: #fff; }
+    .step.active { color: var(--fg); font-weight: 600; }
+
+    .upload-zone {
+      border: 1px dashed var(--border); border-radius: 12px; padding: 32px;
+      text-align: left; cursor: pointer; transition: border-color 0.2s; margin-bottom: 16px;
+    }
+    .upload-zone:hover, .upload-zone.drag { border-color: var(--primary); background: rgba(14,116,144,0.02); }
+    .upload-zone .icon { font-size: 2rem; margin-bottom: 8px; }
+    .filename { margin-top: 8px; font-size: 0.8125rem; font-weight: 600; color: var(--primary); background: rgba(14,116,144,0.06); padding: 4px 12px; border-radius: 6px; display: inline-block; }
+    .input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); font-family: inherit; font-size: 0.875rem; outline: none; }
+    .input:focus { border-color: var(--primary); }
+    .pill-group { display: flex; gap: 8px; margin: 12px 0; }
+    .pill { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-family: inherit; font-weight: 500; font-size: 0.8125rem; color: var(--muted); }
+    .pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .checkbox-row { display: flex; align-items: center; gap: 10px; font-size: 0.875rem; font-weight: 500; margin: 12px 0; }
+
+    /* Result layout — sidebar + main */
+    .result-layout { display: grid; grid-template-columns: 320px 1fr; gap: 32px; align-items: start; }
+    .score-sidebar { position: sticky; top: 88px; }
+    .score-ring-wrap { width: 140px; height: 140px; margin: 16px 0; }
+    .score-ring { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(var(--primary) calc(var(--pct)*1%), #e2e8f0 0); display: flex; align-items: center; justify-content: center; }
+    .score-inner { width: 110px; height: 110px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .score-num { font-size: 2.25rem; font-weight: 700; color: var(--primary-dark); line-height: 1; }
+    .score-label { font-size: 0.7rem; color: var(--muted); font-weight: 500; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; background: #f1f5f9; color: var(--muted); margin-bottom: 12px; }
+    .dim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+    .dim-item { padding: 8px; background: #f8fafc; border-radius: 6px; }
+    .dim-item .label { font-size: 0.7rem; color: var(--muted); font-weight: 500; }
+    .dim-item .val { font-size: 1rem; font-weight: 700; }
+    .bar { height: 3px; background: #e2e8f0; border-radius: 2px; margin-top: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--primary); border-radius: 2px; }
+
+    .deduction { padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 3px solid; background: #f8fafc; }
+    .deduction.error { border-left-color: #ef4444; }
+    .deduction.warn { border-left-color: var(--accent); }
+    .deduction-header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 6px; font-size: 0.8125rem; }
+    .deduction-pts { font-weight: 700; color: var(--primary-dark); }
+    .tag { padding: 2px 8px; border-radius: 4px; background: #fff; border: 1px solid var(--border); font-size: 0.75rem; font-weight: 500; color: var(--muted); }
+
+    /* Practice path — horizontal timeline, not centered stack */
+    .path-timeline { display: flex; gap: 0; margin: 20px 0; overflow-x: auto; padding-bottom: 8px; }
+    .path-step {
+      flex: 1; min-width: 120px; padding: 12px; border: 1px solid var(--border);
+      background: #fff; cursor: pointer; text-align: left; font-size: 0.8125rem;
+      transition: all 0.15s; position: relative;
+    }
+    .path-step:first-child { border-radius: 8px 0 0 8px; }
+    .path-step:last-child { border-radius: 0 8px 8px 0; }
+    .path-step.active { border-color: var(--primary); background: rgba(14,116,144,0.04); }
+    .path-step.done { background: rgba(5,150,105,0.06); border-color: var(--success); }
+    .path-step-num { font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+    .practice-panel { margin-top: 16px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border); }
+
+    /* Tools — side by side */
+    .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .beat-dots { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
+    .beat-dot { width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; transition: all 0.1s; display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;color:var(--muted); }
+    .beat-dot.on { background: var(--primary); color:#fff; transform: scale(1.1); }
+    .beat-dot.accent.on { background: var(--accent); color:#fff; }
+    .rhythm-preview { padding:14px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;margin-bottom:16px; }
+    .rhythm-beat { display:inline-flex;align-items:end;gap:2px;padding:6px 10px;border-radius:6px;border:1px solid transparent;margin-right:8px;margin-bottom:6px;background:#fff; }
+    .rhythm-beat.lit { border-color:var(--primary); background:rgba(14,116,144,0.06); }
+    .rhythm-beat.lit-accent { border-color:var(--accent); background:rgba(217,119,6,0.08); }
+    .rhythm-opt { display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;background:#fff;text-align:left;width:100%;font-family:inherit; }
+    .rhythm-opt.active { border-color:var(--primary); background:rgba(14,116,144,0.04); }
+    .beats-row { display:flex;flex-wrap:wrap;gap:6px;margin-top:8px; }
+    .beats-row button { min-width:36px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:inherit;font-weight:500;font-size:0.8125rem; }
+    .beats-row button.active { background:var(--primary);color:#fff;border-color:var(--primary); }
+    .bpm-display { font-size: 2.5rem; font-weight: 700; color: var(--primary-dark); }
+    .slider-row { display: flex; align-items: center; gap: 16px; margin: 16px 0; }
+    input[type=range] { flex: 1; accent-color: var(--primary); }
+    .tuner-gauge { position: relative; width: 180px; height: 90px; margin: 16px 0; }
+    .gauge-arc { width: 160px; height: 80px; margin: 0 auto; border: 3px solid var(--border); border-bottom: none; border-radius: 160px 160px 0 0; }
+    .needle { position: absolute; bottom: 0; left: 50%; width: 2px; height: 72px; background: var(--primary); transform-origin: bottom center; transition: transform 0.15s; margin-left: -1px; }
+    .note-display { font-size: 2rem; font-weight: 700; }
+
+    /* Chat */
+    .chat-box { max-height: 240px; overflow-y: auto; margin-bottom: 12px; }
+    .chat-msg { padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; max-width: 85%; font-size: 0.875rem; line-height: 1.5; }
+    .chat-msg.bot { background: #f1f5f9; margin-right: auto; }
+    .chat-msg.user { background: rgba(14,116,144,0.1); margin-left: auto; }
+    .chat-input-row { display: flex; gap: 8px; }
+
+    .voice-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; margin-top: 12px; }
+    .voice-wave { display: flex; gap: 3px; align-items: center; height: 20px; opacity: 0.3; }
+    .voice-wave span { width: 3px; background: var(--accent); border-radius: 2px; animation: wave 0.6s ease-in-out infinite alternate; }
+    .voice-wave span:nth-child(2){animation-delay:0.1s;height:14px}
+    .voice-wave span:nth-child(3){animation-delay:0.2s;height:18px}
+    @keyframes wave { from{height:6px} to{height:18px} }
+
+    /* Footer */
+    footer { background: #fff; border-top: 1px solid var(--border); margin-top: auto; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; padding: 48px 0; font-size: 0.875rem; }
+    .footer-grid h4 { font-weight: 600; margin-bottom: 12px; }
+    .footer-grid p, .footer-grid li { color: var(--muted); line-height: 1.7; list-style: none; }
+    .footer-copy { border-top: 1px solid var(--border); padding: 16px 0; text-align: center; font-size: 0.75rem; color: var(--muted); }
+
+    /* Misc */
+    .screen { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .loader { text-align: center; padding: 80px 0; }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--fg); color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 0.875rem; font-weight: 500; z-index: 300; }
+    .gap-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .search-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
+    .confetti-piece { position: absolute; width: 8px; height: 8px; top: -10px; animation: fall linear forwards; }
+    @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+    details summary { cursor: pointer; color: var(--primary); font-weight: 600; font-size: 0.8125rem; }
+    details p { margin-top: 8px; font-size: 0.8125rem; color: var(--muted); line-height: 1.6; padding: 12px; background: #f8fafc; border-radius: 8px; }
+
+    @media (max-width: 900px) {
+      .hero-grid, .grid-3, .grid-2, .practice-layout, .result-layout, .tools-grid, .footer-grid { grid-template-columns: 1fr; }
+      .brand-sub { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-inner">
+    <div class="brand" onclick="showScreen('home')">
+      <div class="brand-icon">🪈</div>
+      <span class="brand-name">FluteBuddy</span>
+      <span class="brand-sub">长笛智能练习平台</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-screen="home" onclick="showScreen('home')">首页</button>
+      <button class="nav-btn" data-screen="practice" onclick="showScreen('practice')">练习与分析</button>
+      <button class="nav-btn" data-screen="tools" onclick="showScreen('tools')">练习工具</button>
+      <button class="nav-btn" data-screen="result" onclick="goResultDemo()">分析报告</button>
+    </nav>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- HOME -->
+  <section id="screen-home" class="screen">
+    <div class="wrap hero-grid section">
+      <div>
+        <p class="eyebrow">AI 驱动的长笛练习分析</p>
+        <h1>让练习有方向，<br><span class="hl">让进步看得见</span></h1>
+        <p class="lead" style="margin-top:20px">
+          上传谱面与演奏，获得专业级分析与指导。
+          界面清晰友好，分析严谨可靠——面向少儿学员、零基础成人、古典乐爱好者与陪练家长。
+        </p>
+        <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn" onclick="showScreen('practice')">开始练习分析 →</button>
+          <button class="btn btn-outline" onclick="showScreen('tools')">打开练习工具</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div style="text-align:center;padding:32px">
+          <div style="font-size:4rem;margin-bottom:16px">🪈</div>
+          <p style="font-weight:600;font-size:1.1rem">AI 演奏分析报告</p>
+          <p style="font-size:0.875rem;color:var(--muted);margin-top:8px">音准 · 节奏 · 音质 · 姿势</p>
+          <div class="hero-stats">
+            <div class="hero-stat">音准 92</div>
+            <div class="hero-stat">节奏 85</div>
+            <div class="hero-stat">综合 88</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-white section-sm">
+      <div class="wrap">
+        <h2>核心功能</h2>
+        <p class="lead" style="margin-bottom:32px">从上传到反馈，完整覆盖练习闭环。</p>
+        <div class="grid-3">
+          <div class="card feature-card" onclick="showScreen('practice')">
+            <div class="feature-icon">📤</div>
+            <h3>上传与分析</h3>
+            <p style="font-size:0.875rem;color:var(--muted);line-height:1.6;margin-top:8px">上传谱面、音频或视频，AI 分析音准、节奏、音质与姿势。</p>
+          </div>
+          <div class="card feature-card" onclick="goResultDemo()">
+            <div class="feature-icon">📊</div>
+            <h3>100 分透明评分</h3>
+            <p style="font-size:0.875rem;color:var(--muted);line-height:1.6;margin-top:8px">逐项展示扣分原因与位置，进步清晰可见。</p>
+          </div>
+          <div class="card feature-card" onclick="showScreen('tools')">
+            <div class="feature-icon">🛠</div>
+            <h3>内置练习工具</h3>
+            <p style="font-size:0.875rem;color:var(--muted);line-height:1.6;margin-top:8px">专业节拍器与校音器，练习过程中随时使用。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap section">
+      <div class="grid-2" style="align-items:start">
+        <div>
+          <h2>为谁而设计</h2>
+          <div style="margin-top:24px;display:flex;flex-direction:column;gap:20px">
+            <div><strong>6–15 岁学员</strong><p style="font-size:0.875rem;color:var(--muted);margin-top:4px">初学或在练，都知道哪里错、怎么改。</p></div>
+            <div><strong>零基础成人</strong><p style="font-size:0.875rem;color:var(--muted);margin-top:4px">从零起步，也有清晰的练习方向。</p></div>
+            <div><strong>古典音乐爱好者</strong><p style="font-size:0.875rem;color:var(--muted);margin-top:4px">自主练习，也能获得专业级反馈。</p></div>
+            <div><strong>陪练家长</strong><p style="font-size:0.875rem;color:var(--muted);margin-top:4px">不懂音乐，也能看懂进度与问题。</p></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>评分机制</h3>
+          <ul style="font-size:0.875rem;color:var(--muted);line-height:2;margin-top:12px;padding-left:0;list-style:none">
+            <li>✓ 满分 100，从 100 起扣，透明可见</li>
+            <li>✓ 支持谱面片段（一页/几小节）</li>
+            <li>✓ 六维评分：音准、节奏、音正确、速度、音质、姿势</li>
+            <li>✓ 针对性练习 → 重新上传 → 对比进步</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRACTICE -->
+  <section id="screen-practice" class="screen hidden">
+    <div class="wrap">
+      <div class="page-head">
+        <p class="eyebrow">练习与分析</p>
+        <h1>上传作品，开始分析</h1>
+        <p class="lead">上传谱面与演奏文件，系统将自动分析并生成评分报告。</p>
+      </div>
+      <div class="practice-layout">
+        <aside class="steps card">
+          <h3 style="margin-bottom:16px">分析流程</h3>
+          <div class="step active"><span class="step-num">1</span>上传谱面</div>
+          <div class="step active"><span class="step-num">2</span>上传演奏</div>
+          <div class="step"><span class="step-num">3</span>AI 分析</div>
+          <div class="step"><span class="step-num">4</span>查看报告</div>
+          <div class="step"><span class="step-num">5</span>针对性练习</div>
+          <p style="margin-top:20px;font-size:0.8125rem;color:var(--muted);line-height:1.6">
+            目标速度 = 每分钟多少拍。谱面或节拍器上的数字即为此意，例如 88 表示一分钟 88 拍。
+          </p>
+        </aside>
+        <div>
+          <div class="card" style="margin-bottom:24px">
+            <h3>谱面照片</h3>
+            <p style="font-size:0.8125rem;color:var(--muted);margin-bottom:12px">随便拍即可，完整或一页/一小段都行，系统会自动识别范围</p>
+            <div class="upload-zone" onclick="document.getElementById('file-sheet').click()"
+                 ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event,'sheet')">
+              <input type="file" id="file-sheet" accept="image/*" hidden onchange="handleFile(this,'sheet')" />
+              <div class="icon">📄</div>
+              <p style="font-weight:600">点击或拖放上传谱面</p>
+              <div class="filename hidden" id="name-sheet"></div>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:24px">
+            <h3>演奏文件</h3>
+            <div class="pill-group">
+              <button class="pill active" id="pill-audio" onclick="setPerfType('audio')">音频</button>
+              <button class="pill" id="pill-video" onclick="setPerfType('video')">视频</button>
+              <button class="pill" id="pill-photo" onclick="setPerfType('photo')">姿势照片</button>
+            </div>
+            <div class="upload-zone" onclick="document.getElementById('file-perf').click()"
+                 ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event,'perf')">
+              <input type="file" id="file-perf" hidden onchange="handleFile(this,'perf')" />
+              <div class="icon" id="perf-icon">🎵</div>
+              <p style="font-weight:600" id="perf-hint">上传演奏音频</p>
+              <div class="filename hidden" id="name-perf"></div>
+            </div>
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <p style="font-size:0.875rem;font-weight:600;margin-bottom:4px">目标速度（每分钟多少拍）</p>
+              <p style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;line-height:1.5">
+                谱面或节拍器上的速度数字。例如 88 = 一分钟 88 拍。默认自动识别，也可手动设置（25–250）。
+              </p>
+              <label class="checkbox-row" style="margin-bottom:12px">
+                <input type="checkbox" id="auto-tempo" checked onchange="toggleAutoTempo()" />
+                自动从谱面识别速度
+              </label>
+              <div id="tempo-manual" class="hidden">
+                <div style="text-align:center;margin-bottom:8px">
+                  <span style="font-size:1.75rem;font-weight:700" id="target-bpm-val">88</span>
+                  <span style="font-size:0.8125rem;color:var(--muted);margin-left:6px">拍/分钟</span>
+                </div>
+                <div class="slider-row">
+                  <button class="btn btn-sm btn-outline" onclick="changeTargetBpm(-4)">−</button>
+                  <input type="range" min="25" max="250" value="88" id="target-bpm-slider" oninput="setTargetBpm(this.value)" />
+                  <button class="btn btn-sm btn-outline" onclick="changeTargetBpm(4)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn" onclick="startAnalyze()">开始分析 →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANALYZING -->
+  <section id="screen-analyzing" class="screen hidden">
+    <div class="wrap loader">
+      <div class="spinner"></div>
+      <h2>正在分析演奏</h2>
+      <p style="color:var(--muted);margin-top:8px" id="analyze-status">识别谱面中…</p>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="screen-result" class="screen hidden">
+    <div class="wrap">
+      <div class="page-head">
+        <p class="eyebrow">分析报告</p>
+        <h1>演奏分析结果</h1>
+        <p class="lead" id="attempt-info">第 1 次练习</p>
+      </div>
+      <div class="result-layout">
+        <!-- Sidebar score -->
+        <aside class="score-sidebar card">
+          <span class="badge" id="partial-badge">完整曲目</span>
+          <p id="alignment-notice" style="font-size:0.75rem;color:var(--muted);margin:8px 0;line-height:1.5"></p>
+          <div class="score-ring-wrap">
+            <div class="score-ring" id="score-ring" style="--pct:82">
+              <div class="score-inner">
+                <div class="score-num" id="score-num">82</div>
+                <div class="score-label">/ 100</div>
+              </div>
+            </div>
+          </div>
+          <h2 id="score-grade" style="font-size:1.125rem">良好</h2>
+          <p id="score-encourage" style="font-size:0.875rem;color:var(--muted);margin-top:4px">进步明显，请参考下方建议继续练习。</p>
+          <p style="font-size:0.8125rem;font-weight:600;margin-top:12px;color:var(--primary-dark)" id="score-formula">100 − 18 = 82 分</p>
+          <div class="dim-grid" id="dim-grid"></div>
+          <button class="btn btn-outline btn-sm" style="width:100%;margin-top:20px" onclick="reupload()">重新上传作品</button>
+        </aside>
+
+        <!-- Main content -->
+        <div>
+          <div class="card" style="margin-bottom:24px" id="voice-card">
+            <h2>教师点评</h2>
+            <p style="font-size:0.8125rem;color:var(--muted);margin-bottom:12px">AI 声音克隆 · 以您的声音提供指导</p>
+            <p id="coaching-text" style="font-size:0.9375rem;line-height:1.75;white-space:pre-line"></p>
+            <div class="voice-bar">
+              <button class="btn btn-sm" onclick="playVoice()">▶ 播放</button>
+              <div class="voice-wave" id="voice-wave"><span></span><span></span><span></span></div>
+              <span style="font-size:0.8125rem;color:var(--muted)">Danying 老师</span>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:24px">
+            <h2>扣分明细</h2>
+            <p style="font-size:0.8125rem;color:var(--muted);margin-bottom:16px">每项标注扣分、位置与改进建议</p>
+            <div id="deduction-list"></div>
+          </div>
+
+          <div class="card" style="margin-bottom:24px">
+            <h2>针对性练习</h2>
+            <p style="font-size:0.8125rem;color:var(--muted);margin-bottom:16px">按问题逐项练习，完成后重新上传对比进步</p>
+            <div class="path-timeline" id="path-timeline"></div>
+            <div class="practice-panel hidden" id="practice-panel">
+              <h3 id="practice-title">练习项 1</h3>
+              <p id="practice-location" style="font-size:0.8125rem;color:var(--primary);font-weight:600;margin:8px 0"></p>
+              <p id="practice-instruction" style="font-weight:600;margin-bottom:8px"></p>
+              <p id="practice-tip" style="font-size:0.875rem;color:var(--muted);margin-bottom:16px"></p>
+              <div class="gap-row">
+                <button class="btn btn-sm" onclick="startPracticeHere()">从此处练习</button>
+                <button class="btn btn-sm btn-success" onclick="markFixed()">已完成</button>
+                <button class="btn btn-sm btn-outline" onclick="askFollowUp()">追问</button>
+                <button class="btn btn-sm btn-outline" onclick="skipNode()">跳过</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-bottom:24px">
+            <div class="card">
+              <h2>追问</h2>
+              <div class="chat-box" id="chat-box">
+                <div class="chat-msg bot">有问题可以随时提问，如「第 3 小节怎么改？」</div>
+              </div>
+              <div class="chat-input-row">
+                <input class="input" id="chat-input" placeholder="输入问题…" onkeydown="if(event.key==='Enter')sendChat()" />
+                <button class="btn btn-sm" onclick="sendChat()">发送</button>
+              </div>
+            </div>
+            <div class="card">
+              <h2>扩展搜索</h2>
+              <input class="input" id="search-query" value="长笛 小星星 练习方法" style="margin-bottom:12px" />
+              <div class="search-grid" id="search-grid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOLS -->
+  <section id="screen-tools" class="screen hidden">
+    <div class="wrap">
+      <div class="page-head">
+        <p class="eyebrow">练习工具</p>
+        <h1>节拍器与校音器</h1>
+        <p class="lead">练习过程中随时使用，辅助节奏与音准训练。</p>
+      </div>
+      <div class="tools-grid">
+        <div class="card">
+          <h2>节拍器</h2>
+          <p style="font-size:0.8125rem;color:var(--muted);margin-bottom:12px">25–250 BPM · 每小节 0–9 拍 · 含切分/三连/三对二</p>
+          <div class="rhythm-preview" id="rhythm-preview"></div>
+          <div class="beat-dots" id="beat-dots"></div>
+          <div class="bpm-display"><span id="bpm-val">88</span> <span style="font-size:0.875rem;color:var(--muted)">BPM</span></div>
+          <div class="slider-row">
+            <button class="btn btn-sm btn-outline" onclick="changeBpm(-4)">−</button>
+            <input type="range" min="25" max="250" value="88" id="bpm-slider" oninput="setBpm(this.value)" />
+            <button class="btn btn-sm btn-outline" onclick="changeBpm(4)">+</button>
+          </div>
+          <p style="font-size:0.875rem;font-weight:600;margin:16px 0 8px">每小节拍数（0–9）</p>
+          <div class="beats-row" id="beats-row"></div>
+          <p style="font-size:0.75rem;color:var(--muted);margin:-4px 0 12px" id="beats-hint"></p>
+          <p style="font-size:0.875rem;font-weight:600;margin:16px 0 8px">节奏型</p>
+          <div id="rhythm-options"></div>
+          <p style="font-size:0.75rem;color:var(--muted);margin-top:8px;display:none" id="hemiola-hint">三对二演示：重音=双拍（每拍一下），轻音=三连音分割（2 拍内共 3 个三连音点）</p>
+          <button class="btn" id="metro-btn" onclick="toggleMetro()" style="margin-top:12px;width:100%">▶ 开始</button>
+        </div>
+        <div class="card">
+          <h2>校音器</h2>
+          <p style="font-size:0.8125rem;color:var(--muted);margin-bottom:12px">连接麦克风后，唱 Do/Re/Mi 或吹奏，实时显示音名与偏差</p>
+          <div id="tuner-mic-status" style="font-size:0.8125rem;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;background:#fff;color:var(--muted)">点击「开始校音」连接麦克风，然后唱或演奏任意音。</div>
+          <div id="tuner-level-wrap" style="display:none;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--muted);margin-bottom:4px"><span>输入音量</span><span id="tuner-level-label">等待声音…</span></div>
+            <div style="height:8px;background:#f1f5f9;border-radius:999px;overflow:hidden"><div id="tuner-level-bar" style="height:100%;width:0;background:var(--primary);transition:width 0.08s"></div></div>
+          </div>
+          <div style="padding:14px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <span style="font-size:0.875rem;font-weight:600">A 标准音高</span>
+              <span style="font-size:0.875rem;font-weight:700;color:var(--primary)" id="a4-label">440 Hz</span>
+            </div>
+            <div class="pill-group" id="a4-options" style="margin:0"></div>
+            <p style="font-size:0.75rem;color:var(--muted);margin-top:10px;line-height:1.5" id="a4-desc"></p>
+            <p style="font-size:0.75rem;color:var(--muted);margin-top:6px;line-height:1.5">各乐团实际音高会有差异，请以您的老师或所在乐团为准。</p>
+          </div>
+          <div class="tuner-gauge">
+            <div class="gauge-arc"></div>
+            <div class="needle" id="tuner-needle" style="transform:translateX(-50%) rotate(0deg)"></div>
+          </div>
+          <div class="note-display"><span id="tuner-note">—</span> <span id="tuner-freq" style="font-size:0.875rem;color:var(--muted)"></span></div>
+          <p id="tuner-cents" style="font-size:0.875rem;font-weight:600;margin:8px 0"></p>
+          <p style="font-size:0.75rem;font-weight:600;color:var(--muted);margin-bottom:4px">参考音（播放标准音对照）</p>
+          <p style="font-size:0.75rem;color:var(--muted);margin-bottom:8px;line-height:1.5">选一个唱名播放对照。La 即所选 A 标准音高。</p>
+          <div class="pill-group" id="ref-notes"></div>
+          <div class="gap-row" style="margin-top:12px">
+            <button class="btn btn-sm" id="tuner-btn" onclick="toggleTuner()">开始校音</button>
+            <button class="btn btn-sm btn-outline" id="play-ref-btn" onclick="playRefNote()">播放 La</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div>
+      <h4>FluteBuddy</h4>
+      <p>专业的长笛练习分析平台，让每一次练习都清楚该练什么、哪里要改。</p>
+    </div>
+    <div>
+      <h4>功能</h4>
+      <ul><li>谱面识别与演奏分析</li><li>100 分透明评分</li><li>节拍器与校音器</li></ul>
+    </div>
+    <div>
+      <h4>适用对象</h4>
+      <ul><li>6–15 岁长笛学生</li><li>零基础成人</li><li>家长陪练</li></ul>
+    </div>
+  </div>
+  <div class="footer-copy wrap">© FluteBuddy · 让每一次练习都有方向</div>
+</footer>
+
+<script>
+const state = { files:{sheet:null,perf:null}, perfType:'audio', autoTempo:true, targetBpm:88, attempt:1, prevScore:null, score:82, currentNode:0, nodesFixed:[], voicePlaying:false };
+const MOCK = {
+  coaching: `《小星星》片段分析完成，综合得分 82 分。\n\n主要改进点：\n1. 第 3 小节音准偏低——建议使用校音器慢速练习\n2. 第 5 小节节奏不均匀——配合节拍器从 60 BPM 开始\n\n请针对性练习后重新上传，对比进步。`,
+  deductions: [
+    { id:'d1', pts:6, cat:'音正确性', sev:'error', loc:'第 3 小节 · G4', reason:'吹成了 F4，音不正确', tip:'对照谱面确认指法' },
+    { id:'d2', pts:5, cat:'音准', sev:'warn', loc:'第 3 小节 · 0:08', reason:'音高偏低约 25 音分', tip:'口型放松，气息支撑稳定' },
+    { id:'d3', pts:4, cat:'节奏', sev:'warn', loc:'第 5 小节 · 0:15', reason:'节奏不均匀，后半段偏快', tip:'节拍器 60 BPM，逐拍对齐' },
+    { id:'d4', pts:3, cat:'音质', sev:'warn', loc:'第 7 小节 · 0:22', reason:'气声偏多', tip:'气息平稳，避免过度用力' },
+  ],
+  dims: { 音准:78, 音正确:74, 节奏:80, 速度:85, 音质:82, 姿势:88 },
+  chatReplies: { '怎么改':'放慢到 60 BPM，只练有问题的小节。','音准':'口型太紧会导致音偏低，放松嘴角。','节奏':'先打拍子唱谱，再拿笛子吹。','default':'建议慢速分段练习，有问题再上传分析。' },
+};
+const SEARCH_ENGINES = [
+  { name:'Google', url:'https://www.google.com/search?q=' },
+  { name:'百度', url:'https://www.baidu.com/s?wd=' },
+  { name:'YouTube', url:'https://www.youtube.com/results?search_query=' },
+  { name:'Bilibili', url:'https://search.bilibili.com/all?keyword=' },
+];
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('screen-' + name).classList.remove('hidden');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.screen === name));
+  window.scrollTo(0, 0);
+}
+function goResultDemo() { state.score=82; state.attempt=1; state.prevScore=null; state.nodesFixed=[]; state.currentNode=0; renderResult(); showScreen('result'); }
+function toast(msg) { const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2500); }
+
+function setPerfType(type) {
+  state.perfType=type;
+  ['audio','video','photo'].forEach(t=>document.getElementById('pill-'+t).classList.toggle('active',t===type));
+  const m={audio:['🎵','上传演奏音频','audio/*'],video:['🎬','上传演奏视频','video/*'],photo:['📷','上传姿势照片','image/*']};
+  document.getElementById('perf-icon').textContent=m[type][0];
+  document.getElementById('perf-hint').textContent=m[type][1];
+  document.getElementById('file-perf').accept=m[type][2];
+}
+function handleFile(input,type) { const f=input.files[0]; if(!f)return; state.files[type==='sheet'?'sheet':'perf']=f; const el=document.getElementById('name-'+(type==='sheet'?'sheet':'perf')); el.textContent=f.name; el.classList.remove('hidden'); }
+function handleDrop(e,type) { e.preventDefault(); e.currentTarget.classList.remove('drag'); const f=e.dataTransfer.files[0]; if(!f)return; state.files[type==='sheet'?'sheet':'perf']=f; const el=document.getElementById('name-'+(type==='sheet'?'sheet':'perf')); el.textContent=f.name; el.classList.remove('hidden'); }
+
+function startAnalyze() {
+  state.autoTempo=document.getElementById('auto-tempo').checked;
+  state.targetBpm=+document.getElementById('target-bpm-slider').value;
+  showScreen('analyzing');
+  const steps=['识别谱面…','分析音准…','检测节奏…','评估音质与姿势…','生成报告…'];
+  let i=0;
+  const iv=setInterval(()=>{
+    document.getElementById('analyze-status').textContent=steps[i++];
+    if(i>=steps.length){ clearInterval(iv); setTimeout(()=>{
+      if(state.attempt>1){ state.prevScore=state.score; state.score=Math.min(100,state.score+Math.floor(Math.random()*8+5)); }
+      else state.score=82;
+      renderResult(); showScreen('result');
+    },500); }
+  },600);
+}
+
+function renderResult() {
+  const s=state.score, perfect=s>=100;
+  document.getElementById('score-num').textContent=perfect?'100':s;
+  document.getElementById('score-ring').style.setProperty('--pct',s);
+  document.getElementById('partial-badge').textContent='片段 · 第 1-2 小节';
+  document.getElementById('alignment-notice').textContent='系统识别到谱面范围为第 1-2 小节，已在此范围内评分。';
+  const grades=s>=100?['满分','演奏准确，继续保持。']:s>=90?['优秀','接近完美，请继续巩固。']:s>=80?['良好','进步明显，请参考建议练习。']:s>=70?['合格','基本达标，部分细节需改进。']:['需加强','建议分段慢速练习。'];
+  document.getElementById('score-grade').textContent=grades[0];
+  document.getElementById('score-encourage').textContent=grades[1];
+  const td=MOCK.deductions.reduce((a,d)=>a+d.pts,0)-state.nodesFixed.length*2;
+  document.getElementById('score-formula').textContent=perfect?'100 分 · 零失误':`100 − ${Math.max(0,td)}${state.nodesFixed.length?' + '+state.nodesFixed.length*2+' 奖励':''} = ${s}`;
+  document.getElementById('attempt-info').textContent=state.prevScore!==null?`第 ${state.attempt} 次练习 · ${s-state.prevScore>=0?'+':''}${s-state.prevScore} 分`:`第 ${state.attempt} 次练习`;
+  document.getElementById('coaching-text').textContent=MOCK.coaching;
+  document.getElementById('dim-grid').innerHTML=Object.entries(MOCK.dims).map(([k,v])=>`<div class="dim-item"><div class="label">${k}</div><div class="val">${v}</div><div class="bar"><div class="bar-fill" style="width:${v}%"></div></div></div>`).join('');
+  document.getElementById('deduction-list').innerHTML=MOCK.deductions.map(d=>`<div class="deduction ${d.sev==='error'?'error':'warn'}"><div class="deduction-header"><span class="deduction-pts">−${d.pts}</span><span class="tag">${d.cat}</span><span class="tag">${d.loc}</span></div><p style="font-weight:600;font-size:0.875rem">${d.reason}</p><p style="font-size:0.8125rem;color:var(--muted);margin-top:4px">${d.tip}</p></div>`).join('');
+  renderPath(); renderSearch();
+  if(perfect) launchConfetti();
+}
+
+function renderPath() {
+  const tl=document.getElementById('path-timeline');
+  tl.innerHTML=MOCK.deductions.map((d,i)=>{
+    const done=state.nodesFixed.includes(i), active=i===state.currentNode&&!done;
+    return `<div class="path-step${done?' done':''}${active?' active':''}" onclick="selectNode(${i})"><div class="path-step-num">${done?'✓':i+1}</div>${d.cat}<br><span style="color:var(--muted)">${d.loc}</span></div>`;
+  }).join('');
+  selectNode(state.currentNode);
+}
+function selectNode(i) {
+  if(state.nodesFixed.includes(i)) return;
+  state.currentNode=i; const d=MOCK.deductions[i];
+  document.getElementById('practice-panel').classList.remove('hidden');
+  document.getElementById('practice-title').textContent='练习项 '+(i+1)+' · '+d.cat;
+  document.getElementById('practice-location').textContent=d.loc;
+  document.getElementById('practice-instruction').textContent=d.reason;
+  document.getElementById('practice-tip').textContent=d.tip;
+  renderPath();
+}
+function startPracticeHere(){ toast('已跳转练习工具'); showScreen('tools'); }
+function markFixed(){
+  if(!state.nodesFixed.includes(state.currentNode)){ state.nodesFixed.push(state.currentNode); state.score=Math.min(100,state.score+2); toast('+2 分练习奖励'); }
+  const next=MOCK.deductions.findIndex((_,i)=>!state.nodesFixed.includes(i));
+  if(next>=0) selectNode(next);
+  else { document.getElementById('practice-panel').innerHTML='<p style="font-weight:600;color:var(--success)">全部练习项已完成。请重新上传完整演奏。</p><button class="btn btn-sm" style="margin-top:12px" onclick="reupload()">重新上传</button>'; toast('全部完成'); }
+  document.getElementById('score-num').textContent=state.score;
+  document.getElementById('score-ring').style.setProperty('--pct',state.score);
+}
+function skipNode(){ const n=MOCK.deductions.findIndex((_,i)=>!state.nodesFixed.includes(i)&&i!==state.currentNode); if(n>=0)selectNode(n); }
+function askFollowUp(){ const d=MOCK.deductions[state.currentNode]; addChat('「'+d.loc+'」怎么改？',true); setTimeout(()=>addChat('放慢练习「'+d.loc+'」。'+d.tip,false),500); }
+function reupload(){ state.attempt++; state.files={sheet:null,perf:null}; state.nodesFixed=[]; state.currentNode=0; document.getElementById('name-sheet').classList.add('hidden'); document.getElementById('name-perf').classList.add('hidden'); showScreen('practice'); toast('请上传修改后的作品'); }
+
+function addChat(t,u){ const b=document.getElementById('chat-box'),d=document.createElement('div'); d.className='chat-msg '+(u?'user':'bot'); d.textContent=t; b.appendChild(d); b.scrollTop=b.scrollHeight; }
+function sendChat(){ const inp=document.getElementById('chat-input'),q=inp.value.trim(); if(!q)return; addChat(q,true); inp.value=''; let r=MOCK.chatReplies.default; for(const[k,v] of Object.entries(MOCK.chatReplies)){if(k!=='default'&&q.includes(k)){r=v;break;}} setTimeout(()=>addChat(r,false),500); }
+function renderSearch(){ document.getElementById('search-grid').innerHTML=SEARCH_ENGINES.map(e=>`<a class="btn btn-sm btn-outline" style="text-decoration:none" href="${e.url}${encodeURIComponent(document.getElementById('search-query').value)}" target="_blank">${e.name}</a>`).join(''); }
+document.getElementById('search-query')?.addEventListener('input',renderSearch);
+function playVoice(){ state.voicePlaying=!state.voicePlaying; document.getElementById('voice-wave').style.opacity=state.voicePlaying?1:0.3; toast(state.voicePlaying?'播放指导音频（演示）':'暂停'); if(state.voicePlaying)setTimeout(()=>{state.voicePlaying=false;document.getElementById('voice-wave').style.opacity=0.3;},4000); }
+function launchConfetti(){ const w=document.createElement('div'); w.className='confetti-wrap'; ['#0e7490','#d97706','#0369a1','#059669'].forEach((c,i)=>{for(let j=0;j<8;j++){const p=document.createElement('div');p.className='confetti-piece';p.style.cssText=`left:${Math.random()*100}%;background:${c};animation-duration:${2+Math.random()}s;animation-delay:${Math.random()}s`;w.appendChild(p);}}); document.body.appendChild(w); setTimeout(()=>w.remove(),3500); }
+
+let bpm=88,beats=4,rhythmPattern='quarter',metroRunning=false,metroInterval=null,tickIdx=0,curBeat=0,curSub=0,audioCtx=null;
+const BEATS_OPTIONS=[0,1,2,3,4,5,6,7,8,9];
+const RHYTHM_CATEGORIES=['基础','十六分','切分','连音','复合'];
+const RHYTHM_PATTERNS=[
+  {id:'quarter',label:'四分音符',desc:'每拍 1 个四分',cat:'基础',cycleBeats:1,cycleUnits:4,hits:[1,0,0,0],beatNotation:[{groups:[{notes:['4']}]}],gridHighlight:[{g:0,n:0},{g:0,n:0},{g:0,n:0},{g:0,n:0}]},
+  {id:'eighth',label:'两个八分音符',desc:'每拍 2 个八分连写',cat:'基础',cycleBeats:1,cycleUnits:4,hits:[1,0,1,0],beatNotation:[{groups:[{notes:['8','8']}]}],gridHighlight:[{g:0,n:0},{g:0,n:0},{g:0,n:1},{g:0,n:1}]},
+  {id:'sixteenth',label:'四个十六分音符',desc:'每拍 4 个十六分连写',cat:'基础',cycleBeats:1,cycleUnits:4,hits:[1,1,1,1],beatNotation:[{groups:[{notes:['16','16','16','16']}]}],gridHighlight:[{g:0,n:0},{g:0,n:1},{g:0,n:2},{g:0,n:3}]},
+  {id:'front_16',label:'前十六后八',desc:'两个十六分 + 一个八分，符杠相连',cat:'十六分',cycleBeats:1,cycleUnits:4,hits:[1,1,1,0],beatNotation:[{groups:[{notes:['16','16','8']}]}],gridHighlight:[{g:0,n:0},{g:0,n:1},{g:0,n:2},{g:0,n:2}]},
+  {id:'back_16',label:'前八后十六',desc:'一个八分 + 两个十六分，符杠相连',cat:'十六分',cycleBeats:1,cycleUnits:4,hits:[1,0,1,1],beatNotation:[{groups:[{notes:['8','16','16']}]}],gridHighlight:[{g:0,n:0},{g:0,n:0},{g:0,n:1},{g:0,n:2}]},
+  {id:'triplet',label:'三连音',desc:'一拍内 3 个八分连写',cat:'连音',cycleBeats:1,cycleUnits:3,hits:[1,1,1],beatNotation:[{groups:[{notes:['8','8','8']}]}],gridHighlight:[{g:0,n:0},{g:0,n:1},{g:0,n:2}],triplet:true},
+  {id:'small_sync',label:'小切分',desc:'十六分+八分+十六分，共 1 拍',cat:'切分',cycleBeats:1,cycleUnits:4,hits:[1,1,0,1],beatNotation:[{groups:[{notes:['16','8','16']}]}],gridHighlight:[{g:0,n:0},{g:0,n:1},{g:0,n:1},{g:0,n:2}]},
+  {id:'big_sync',label:'大切分',desc:'两拍：八分+四分+八分，符杠相连',cat:'切分',cycleBeats:2,cycleUnits:8,hits:[1,0,1,0,0,0,1,0],beatNotation:[{groups:[{notes:['8','4','8']}]}],gridHighlight:[{g:0,n:0},{g:0,n:0},{g:0,n:1},{g:0,n:1},{g:0,n:1},{g:0,n:1},{g:0,n:2},{g:0,n:2}],recommendedBeats:2},
+  {id:'hemiola_32',label:'三对二（3:2）',desc:'2 拍内双拍×三连音叠置',cat:'复合',cycleBeats:2,cycleUnits:6,hits:[1,0,1,1,1,0],levels:['accent','sub','sub','beat','sub','sub'],beatNotation:[{groups:[{notes:['8','8','8']}]}],gridHighlight:[{g:0,n:0},{g:0,n:0},{g:0,n:1},{g:0,n:1},{g:0,n:2},{g:0,n:2}],recommendedBeats:2}
+];
+
+const NOTE_HEAD={16:{rx:3,ry:2.2},8:{rx:3.6,ry:2.7},4:{rx:5.5,ry:4}};
+function noteUnit(k){ return k==='16'?1:k==='8'?2:4; }
+function noteCenters(notes,beatW){
+  const units=notes.map(noteUnit),total=units.reduce((a,b)=>a+b,0),uw=beatW/total; let x=0;
+  return units.map(u=>{ const cx=x+u*uw/2; x+=u*uw; return cx; });
+}
+function stemX(cx,k){ return cx+NOTE_HEAD[k].rx*0.75; }
+function isSmallSync(notes){ return notes.length===3&&notes[0]==='16'&&notes[1]==='8'&&notes[2]==='16'; }
+function rhythmSvg(groups,opts){
+  opts=opts||{}; const compact=!!opts.compact, triplet=!!opts.triplet, hl=opts.highlight, spanBeats=opts.spanBeats||1;
+  const padX=4, groupGap=compact?6:10, beatW=compact?44:52; let totalW=padX*2;
+  groups.forEach(g=>{ const u=g.notes.reduce((s,n)=>s+noteUnit(n),0); totalW+=Math.max(u/(4*spanBeats)*beatW*spanBeats,beatW*0.5); });
+  totalW+=groupGap*(Math.max(0,groups.length-1));
+  const h=triplet?34:28; let svg=`<svg viewBox="0 0 ${totalW} ${h}" width="${totalW}" height="${h}" style="display:inline-block;vertical-align:middle">`;
+  if(triplet&&groups.length===1&&groups[0].notes.length===3)
+    svg+=`<text x="${totalW/2}" y="4" text-anchor="middle" font-size="7" font-weight="700" fill="var(--primary)">3</text>`;
+  let offset=padX;
+  groups.forEach((fig,gi)=>{
+    const notes=fig.notes, units=notes.reduce((s,n)=>s+noteUnit(n),0), groupW=units/(4*spanBeats)*beatW*spanBeats;
+    const centers=noteCenters(notes,groupW), headY=20, stemTop=5;
+    const smallSync=isSmallSync(notes);
+    const beamed=notes.length>1&&notes.every(n=>n!=='4')&&!notes.some((n,i)=>n==='4'&&i>0&&i<notes.length-1);
+    const stems=notes.map((k,i)=>({sx:stemX(centers[i],k),cx:centers[i],k,i}));
+    const b1=stemTop,b2=stemTop+3.5,bStart=stems[0].sx,bEnd=stems[stems.length-1].sx;
+    const si=notes.map((n,i)=>n==='16'?i:-1).filter(i=>i>=0);
+    const consec=si.length>=2&&si.every((idx,i)=>i===0||idx===si[i-1]+1);
+    svg+=`<g transform="translate(${offset},0)">`;
+    stems.forEach(({sx,i})=>{ svg+=`<line x1="${sx}" y1="${beamed||smallSync?stemTop:stemTop-2}" x2="${sx}" y2="${headY-NOTE_HEAD[notes[i]].ry+0.5}" stroke="currentColor" stroke-width="1.2"/>`; });
+    centers.forEach((cx,i)=>{ const k=notes[i],{rx,ry}=NOTE_HEAD[k], lit=hl&&hl.group===gi&&hl.note===i, sx=stems[i].sx;
+      svg+=`<ellipse cx="${cx}" cy="${headY}" rx="${rx}" ry="${ry}" fill="${lit?'var(--primary)':'currentColor'}" transform="rotate(-18 ${cx} ${headY})"/>`;
+      if(k==='8'&&!beamed&&!smallSync) svg+=`<path d="M ${sx} ${stemTop-2} Q ${sx+5} ${stemTop+2} ${sx+4} ${stemTop+7}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>`;
+    });
+    if(smallSync){
+      svg+=`<line x1="${bStart}" y1="${b1}" x2="${bEnd}" y2="${b1}" stroke="currentColor" stroke-width="2.2"/>`;
+      svg+=`<line x1="${stems[0].sx}" y1="${b2}" x2="${stems[0].sx+5}" y2="${b2}" stroke="currentColor" stroke-width="2.2"/>`;
+      svg+=`<line x1="${stems[2].sx-5}" y1="${b2}" x2="${stems[2].sx}" y2="${b2}" stroke="currentColor" stroke-width="2.2"/>`;
+    } else if(beamed){
+      svg+=`<line x1="${bStart}" y1="${b1}" x2="${bEnd}" y2="${b1}" stroke="currentColor" stroke-width="2.2"/>`;
+      if(si.length>=2&&consec) svg+=`<line x1="${stems[si[0]].sx}" y1="${b2}" x2="${stems[si[si.length-1]].sx}" y2="${b2}" stroke="currentColor" stroke-width="2.2"/>`;
+    }
+    svg+='</g>'; offset+=groupW+groupGap;
+  });
+  return svg+'</svg>';
+}
+function notationSpanBeats(id){ return id==='big_sync'||id==='hemiola_32'?2:1; }
+
+function getPattern(id){ return RHYTHM_PATTERNS.find(p=>p.id===id)||RHYTHM_PATTERNS[0]; }
+
+function buildMeasureTicks(patternId,beatsPerMeasure){
+  const pattern=getPattern(patternId);
+  const b=Math.max(1,beatsPerMeasure||1);
+  const unitsPerBeat=pattern.cycleUnits/pattern.cycleBeats;
+  const measureUnits=Math.round(b*unitsPerBeat);
+  const ticks=[];
+  for(let u=0;u<measureUnits;u++){
+    const pos=u%pattern.cycleUnits;
+    if(!pattern.hits[pos]) continue;
+    const beat=Math.floor(u/unitsPerBeat)%b;
+    const sub=u%Math.round(unitsPerBeat);
+    let level=pattern.levels?.[pos]??'sub';
+    if(beatsPerMeasure===0) level='beat';
+    else if(!pattern.levels){
+      const isDown=sub===0;
+      if(beat===0&&isDown) level='accent';
+      else if(isDown) level='beat';
+      else level='sub';
+    }
+    ticks.push({level,beat:beatsPerMeasure===0?0:beat,sub,unit:u});
+  }
+  return ticks;
+}
+
+function getMeasureUnitCount(patternId,beatsPerMeasure){
+  const p=getPattern(patternId), b=Math.max(1,beatsPerMeasure||1);
+  return Math.round(b*(p.cycleUnits/p.cycleBeats));
+}
+function getUnitDurationMs(bpmVal,patternId){
+  const p=getPattern(patternId);
+  return (60/bpmVal)/(p.cycleUnits/p.cycleBeats)*1000;
+}
+
+function gridSubToHighlight(patternId,beatIndex,sub){
+  const p=getPattern(patternId);
+  const upb=p.cycleUnits/p.cycleBeats;
+  const pos=(beatIndex%p.cycleBeats)*Math.round(upb)+sub;
+  const h=p.gridHighlight?.[pos];
+  return h?{group:h.g,note:h.n}:{group:0,note:sub};
+}
+function getNotationCells(patternId,beatsPerMeasure){
+  const pattern=getPattern(patternId);
+  const b=Math.max(1,beatsPerMeasure||1);
+  const rows=[];
+  if(pattern.beatNotation?.length===1&&pattern.cycleBeats>1){
+    for(let beat=0;beat<b;beat+=pattern.cycleBeats){
+      rows.push({beat:beat+1,notation:pattern.beatNotation[0],spanBeats:pattern.cycleBeats});
+    }
+    return rows;
+  }
+  for(let beat=0;beat<b;beat++){
+    const cycleBeat=beat%pattern.cycleBeats;
+    rows.push({beat:beat+1,notation:pattern.beatNotation?.[cycleBeat]??{groups:[{notes:['4']}]} });
+  }
+  return rows;
+}
+
+function getMeasureTicks(){ return buildMeasureTicks(rhythmPattern,beats); }
+
+function initBeatsRow(){
+  document.getElementById('beats-row').innerHTML=BEATS_OPTIONS.map(n=>
+    `<button class="${n===beats?'active':''}" onclick="setBeats(${n})" title="${n===0?'自由模式：无小节重音':n+' 拍/小节'}">${n}</button>`
+  ).join('');
+  document.getElementById('beats-hint').textContent=beats===0?'0 = 自由模式，仅按节奏型发声':beats+' 拍/小节';
+}
+
+function initRhythmOptions(){
+  let html='';
+  RHYTHM_CATEGORIES.forEach(cat=>{
+    const items=RHYTHM_PATTERNS.filter(p=>p.cat===cat);
+    if(!items.length) return;
+    html+=`<p style="font-size:0.75rem;font-weight:600;color:var(--muted);margin:8px 0 4px">${cat}</p>`;
+    items.forEach(r=>{
+      const preview=r.beatNotation?.[0]?.groups;
+      html+=`<button class="rhythm-opt${r.id===rhythmPattern?' active':''}" onclick="setRhythm('${r.id}')">
+        <span><strong style="font-size:0.875rem">${r.label}</strong> <span style="font-size:0.75rem;color:var(--muted)">${r.desc}</span></span>
+        ${preview?rhythmSvg(preview,{compact:true,triplet:r.triplet,spanBeats:notationSpanBeats(r.id)}):`<span style="font-size:0.75rem;color:var(--muted)">${r.desc}</span>`}
+      </button>`;
+    });
+  });
+  document.getElementById('rhythm-options').innerHTML=html;
+  document.getElementById('hemiola-hint').style.display=rhythmPattern==='hemiola_32'?'block':'none';
+}
+
+function renderRhythmPreview(){
+  const r=getPattern(rhythmPattern);
+  const notation=getNotationCells(rhythmPattern,beats);
+  const modeLabel=beats===0?'自由模式':beats+' 拍/小节';
+  let html=`<p style="font-size:0.75rem;color:var(--muted);margin-bottom:10px">节奏记谱 · ${modeLabel} · ${r.label}</p>`;
+  const showTriplet=r.triplet===true;
+  notation.forEach(({beat,notation:bn,spanBeats})=>{
+    const span=spanBeats||1;
+    const lit=metroRunning&&curBeat>=beat-1&&curBeat<beat-1+span;
+    const hl=lit?gridSubToHighlight(rhythmPattern,curBeat,curSub):null;
+    html+=`<span class="rhythm-beat${lit?(beat===1?' lit-accent':' lit'):''}">`;
+    html+=`<span style="font-size:0.65rem;color:var(--muted);margin-right:4px">${span>1?beat+'–'+(beat+span-1):beat}</span>`;
+    html+=rhythmSvg(bn.groups,{triplet:showTriplet&&rhythmPattern==='triplet',highlight:hl,spanBeats:span});
+    html+='</span>';
+  });
+  document.getElementById('rhythm-preview').innerHTML=html;
+}
+
+function initBeatDots(){
+  const el=document.getElementById('beat-dots');
+  el.innerHTML='';
+  el.style.display=beats===0?'none':'flex';
+  const displayBeats=beats===0?1:beats;
+  for(let i=0;i<displayBeats;i++){
+    const d=document.createElement('div');
+    d.className='beat-dot'+(i===0?' accent':'');
+    d.id='beat-'+i;
+    d.textContent=i+1;
+    el.appendChild(d);
+  }
+  renderRhythmPreview();
+}
+
+function setBpm(v){bpm=+v;document.getElementById('bpm-val').textContent=bpm;document.getElementById('bpm-slider').value=bpm;if(metroRunning){stopMetro();startMetro();}}
+function changeBpm(d){setBpm(Math.max(25,Math.min(250,bpm+d)));}
+function setBeats(n){beats=n;initBeatsRow();initBeatDots();if(metroRunning){stopMetro();startMetro();}}
+function setRhythm(id){
+  rhythmPattern=id;
+  const p=getPattern(id);
+  if(p.recommendedBeats!=null) beats=p.recommendedBeats;
+  initBeatsRow();initRhythmOptions();initBeatDots();
+  if(metroRunning){stopMetro();startMetro();}
+}
+
+function playClickLevel(level){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  const prof={accent:[1400,0.45,0.07,'sine'],beat:[900,0.28,0.055,'triangle'],sub:[520,0.12,0.035,'square']}[level];
+  const t=audioCtx.currentTime, o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type=prof[3]; o.connect(g);g.connect(audioCtx.destination);o.frequency.value=prof[0];
+  g.gain.setValueAtTime(prof[1],t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+prof[2]);
+  o.start(t);o.stop(t+prof[2]);
+}
+
+function startMetro(){
+  const ticks=getMeasureTicks();
+  if(!ticks.length) return;
+  const tickMap=new Map(); ticks.forEach(t=>tickMap.set(t.unit,t));
+  const measureUnits=getMeasureUnitCount(rhythmPattern,beats);
+  const unitMs=getUnitDurationMs(bpm,rhythmPattern);
+  let unitIdx=0;
+  metroInterval=setInterval(()=>{
+    const u=unitIdx%measureUnits;
+    const tick=tickMap.get(u);
+    if(tick){
+      curBeat=tick.beat; curSub=tick.sub;
+      if(beats>0){
+        document.querySelectorAll('.beat-dot').forEach(d=>d.classList.remove('on'));
+        const dot=document.getElementById('beat-'+tick.beat);
+        if(dot) dot.classList.add('on');
+      }
+      playClickLevel(tick.level);
+      renderRhythmPreview();
+    }
+    unitIdx++;
+  },unitMs);
+  metroRunning=true;
+  document.getElementById('metro-btn').textContent='⏸ 停止';
+}
+
+function stopMetro(){
+  clearInterval(metroInterval);metroRunning=false;curBeat=0;curSub=0;
+  document.getElementById('metro-btn').textContent='▶ 开始';
+  document.querySelectorAll('.beat-dot').forEach(d=>d.classList.remove('on'));
+  renderRhythmPreview();
+}
+function toggleMetro(){metroRunning?stopMetro():startMetro();}
+
+const NOTE_FREQ_A440={C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88};
+const SOLFEGE_REF=[
+  {id:'C4',label:'Do'},{id:'D4',label:'Re'},{id:'E4',label:'Mi'},{id:'F4',label:'Fa'},
+  {id:'G4',label:'Sol'},{id:'A4',label:'La'},{id:'B4',label:'Si'}
+];
+function solfegeLabel(id){ return SOLFEGE_REF.find(n=>n.id===id)?.label||id; }
+const A4_OPTIONS=[440,441,442];
+const A4_INFO={
+  440:'ISO 16 国际通用标准。英美及多数地区默认；法国当代音乐中心（Cité de la Musique）等少数团体也用 440。',
+  441:'部分美国乐团曾用或仍用，如波士顿交响乐团。并非德国/荷兰的主流标准。',
+  442:'欧洲大陆乐团最常见之一：德国、奥地利、荷兰、法国（巴黎多数音乐会）等；纽约爱乐等亦曾使用。'
+};
+let refNote='A4', a4Ref=440, tunerRunning=false, tunerAnim=null, tunerStream=null, tunerCtx=null, tunerAnalyser=null, refToneOsc=null, refToneGain=null, refTonePlaying=false;
+
+function getRefFreq(note){ const base=NOTE_FREQ_A440[note]||a4Ref; return base*(a4Ref/440); }
+
+function initA4Options(){
+  document.getElementById('a4-options').innerHTML=A4_OPTIONS.map(hz=>
+    `<button class="pill${hz===a4Ref?' active':''}" onclick="setA4Ref(${hz})">${hz}</button>`
+  ).join('');
+  document.getElementById('a4-label').textContent=a4Ref+' Hz';
+  const desc=document.getElementById('a4-desc');
+  if(desc) desc.textContent=A4_INFO[a4Ref]||'';
+}
+function setA4Ref(hz){ a4Ref=hz; stopRefTone(); initA4Options(); initRefNotes(); toast('A 标准音高已设为 '+hz+' Hz'); }
+
+function setRefNote(id){
+  refNote=id; stopRefTone();
+  initRefNotes();
+  updateRefBtnLabel();
+}
+function updateRefBtnLabel(){
+  const btn=document.getElementById('play-ref-btn');
+  if(btn) btn.textContent=(refTonePlaying?'停止 ':'播放 ')+solfegeLabel(refNote);
+}
+function stopRefTone(){
+  if(!refToneOsc) return;
+  const ctx=audioCtx, now=ctx.currentTime, release=0.12;
+  refToneGain.gain.cancelScheduledValues(now);
+  refToneGain.gain.setValueAtTime(0.22,now);
+  refToneGain.gain.linearRampToValueAtTime(0,now+release);
+  refToneOsc.stop(now+release+0.02);
+  refToneOsc=null; refToneGain=null; refTonePlaying=false; updateRefBtnLabel();
+}
+function initRefNotes(){
+  document.getElementById('ref-notes').innerHTML=SOLFEGE_REF.map(({id,label})=>
+    `<button class="pill${id===refNote?' active':''}" onclick="setRefNote('${id}')">${label}</button>`
+  ).join('');
+}
+
+function playRefNote(){
+  if(refTonePlaying){ stopRefTone(); return; }
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  const t=audioCtx.currentTime;
+  refToneOsc=audioCtx.createOscillator(); refToneGain=audioCtx.createGain();
+  refToneOsc.connect(refToneGain); refToneGain.connect(audioCtx.destination);
+  refToneOsc.frequency.value=getRefFreq(refNote); refToneOsc.type='sine';
+  refToneGain.gain.setValueAtTime(0,t);
+  refToneGain.gain.linearRampToValueAtTime(0.22,t+0.06);
+  refToneOsc.start(t);
+  refTonePlaying=true; updateRefBtnLabel();
+  toast('持续播放 '+solfegeLabel(refNote)+' · '+getRefFreq(refNote).toFixed(1)+' Hz（再点停止）');
+}
+
+const SOLFEGE_MAP={C:'Do','C#':'Do♯',D:'Re','D#':'Re♯',E:'Mi',F:'Fa','F#':'Fa♯',G:'Sol','G#':'Sol♯',A:'La','A#':'La♯',B:'Si'};
+function freqToSolfege(freq,a4){
+  if(freq<=0)return{note:'—',cents:0};
+  const noteNum=12*Math.log2(freq/a4)+69, rounded=Math.round(noteNum), cents=Math.round((noteNum-rounded)*100);
+  const names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const sci=names[((rounded%12)+12)%12]+(Math.floor(rounded/12)-1);
+  const letter=sci.match(/^[A-G]#?/)?.[0]||'';
+  return{note:SOLFEGE_MAP[letter]||sci,cents};
+}
+function detectPitchHz(buf,sr){
+  let rms=0; for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i]; rms=Math.sqrt(rms/buf.length);
+  if(rms<0.008) return{rms,freq:-1};
+  let r1=0,r2=buf.length-1; for(let i=0;i<buf.length/2;i++) if(Math.abs(buf[i])<0.2){r1=i;break;}
+  for(let i=1;i<buf.length/2;i++) if(Math.abs(buf[buf.length-i])<0.2){r2=buf.length-i;break;}
+  const trimmed=buf.slice(r1,r2), len=trimmed.length, c=new Float32Array(len);
+  for(let i=0;i<len;i++) for(let j=0;j<len-i;j++) c[i]+=trimmed[j]*trimmed[j+i];
+  let d=1; while(d<len-1&&c[d]>c[d+1]) d++;
+  const minP=Math.floor(sr/1200), maxP=Math.floor(sr/60); let maxVal=-1,maxPos=-1;
+  for(let i=Math.max(d,minP);i<Math.min(len,maxP);i++) if(c[i]>maxVal){maxVal=c[i];maxPos=i;}
+  if(maxPos<=0) return{rms,freq:-1};
+  return{rms,freq:sr/maxPos};
+}
+function setTunerStatus(msg,isErr){
+  const el=document.getElementById('tuner-mic-status');
+  el.textContent=msg;
+  el.style.color=isErr?'#b91c1c':'var(--muted)';
+  el.style.background=isErr?'#fef2f2':'#fff';
+  el.style.borderColor=isErr?'#fecaca':'var(--border)';
+}
+function stopTuner(){
+  tunerRunning=false; cancelAnimationFrame(tunerAnim);
+  tunerStream?.getTracks().forEach(t=>t.stop()); tunerStream=null;
+  tunerCtx?.close(); tunerCtx=null; tunerAnalyser=null;
+  document.getElementById('tuner-btn').textContent='开始校音';
+  document.getElementById('tuner-level-wrap').style.display='none';
+  document.getElementById('tuner-note').textContent='—';
+  document.getElementById('tuner-freq').textContent='';
+  document.getElementById('tuner-cents').textContent='';
+  document.getElementById('tuner-needle').style.transform='translateX(-50%) rotate(0deg)';
+  setTunerStatus('点击「开始校音」连接麦克风，然后唱或演奏任意音。',false);
+}
+async function toggleTuner(){
+  if(tunerRunning){ stopTuner(); return; }
+  if(!navigator.mediaDevices?.getUserMedia){
+    setTunerStatus('当前浏览器不支持麦克风。请用 Chrome/Safari/Edge，并通过 HTTPS 或 localhost 打开。',true);
+    return;
+  }
+  setTunerStatus('正在请求麦克风权限…',false);
+  document.getElementById('tuner-btn').textContent='连接中…';
+  try{
+    tunerStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    tunerCtx=new(window.AudioContext||window.webkitAudioContext)();
+    if(tunerCtx.state==='suspended') await tunerCtx.resume();
+    tunerAnalyser=tunerCtx.createAnalyser();
+    tunerAnalyser.fftSize=4096; tunerAnalyser.smoothingTimeConstant=0.85;
+    tunerCtx.createMediaStreamSource(tunerStream).connect(tunerAnalyser);
+    tunerRunning=true;
+    document.getElementById('tuner-btn').textContent='停止';
+    document.getElementById('tuner-level-wrap').style.display='block';
+    setTunerStatus('麦克风已连接。请对着麦克风唱 Do、Re、Mi 或吹奏。',false);
+    let silent=0;
+    function loop(){
+      if(!tunerRunning) return;
+      const buf=new Float32Array(tunerAnalyser.fftSize);
+      tunerAnalyser.getFloatTimeDomainData(buf);
+      const {rms,freq}=detectPitchHz(buf,tunerCtx.sampleRate);
+      const level=Math.min(100,Math.round(rms*800));
+      document.getElementById('tuner-level-bar').style.width=level+'%';
+      document.getElementById('tuner-level-label').textContent=level>5?'有信号':'等待声音…';
+      if(rms<0.008){
+        silent++;
+        if(silent>8){
+          document.getElementById('tuner-note').textContent='—';
+          document.getElementById('tuner-freq').textContent='';
+          document.getElementById('tuner-cents').textContent='';
+          document.getElementById('tuner-needle').style.transform='translateX(-50%) rotate(0deg)';
+          setTunerStatus('未检测到声音——请对着麦克风唱或吹奏。',false);
+        }
+      } else {
+        silent=0;
+        if(freq>0){
+          const {note,cents}=freqToSolfege(freq,a4Ref);
+          const rot=Math.max(-45,Math.min(45,cents*0.9));
+          document.getElementById('tuner-needle').style.transform=`translateX(-50%) rotate(${rot}deg)`;
+          document.getElementById('tuner-note').textContent=note;
+          document.getElementById('tuner-freq').textContent=freq.toFixed(1)+' Hz';
+          const a=Math.abs(cents);
+          document.getElementById('tuner-cents').textContent=a<10?'准确 · A='+a4Ref+' Hz':(cents>0?`偏高 ${a} 音分`:`偏低 ${a} 音分`);
+          document.getElementById('tuner-cents').style.color=a<10?'var(--success)':'var(--primary-dark)';
+          setTunerStatus('正在识别音高…',false);
+        }
+      }
+      tunerAnim=requestAnimationFrame(loop);
+    }
+    loop();
+  }catch(err){
+    stopTuner();
+    const n=err?.name||'';
+    if(n==='NotAllowedError'||n==='PermissionDeniedError')
+      setTunerStatus('麦克风权限被拒绝。请在浏览器或系统设置中允许本网站使用麦克风。',true);
+    else if(n==='NotFoundError')
+      setTunerStatus('未找到麦克风。请连接麦克风或带麦耳机。',true);
+    else
+      setTunerStatus('无法启动麦克风，请检查设备与权限。',true);
+  }
+}
+function toggleAutoTempo(){
+  state.autoTempo=document.getElementById('auto-tempo').checked;
+  document.getElementById('tempo-manual').classList.toggle('hidden',state.autoTempo);
+}
+function setTargetBpm(v){
+  state.targetBpm=Math.max(25,Math.min(250,+v));
+  document.getElementById('target-bpm-val').textContent=state.targetBpm;
+  document.getElementById('target-bpm-slider').value=state.targetBpm;
+}
+function changeTargetBpm(d){ setTargetBpm(state.targetBpm+d); }
+
+initBeatsRow(); initRhythmOptions(); initBeatDots(); initA4Options(); initRefNotes(); renderSearch(); toggleAutoTempo();
+</script>
+</body>
+</html>
