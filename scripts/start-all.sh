@@ -7,7 +7,15 @@ cd "$ROOT"
 echo "==> FluteBuddy 一键启动"
 
 # API Key 由 share.env 提供（不提交 git，向仓库所有者私聊索取）
-if [[ ! -f share.env ]]; then
+_has_api_key() {
+  local file=$1
+  [[ -f "$file" ]] && grep -qE '^GOOGLE_API_KEY=.+' "$file" \
+    && ! grep -qE '^GOOGLE_API_KEY=(请粘贴私下收到的密钥|你的密钥|)$' "$file"
+}
+
+if _has_api_key .env; then
+  : # 已有 .env，直接启动
+elif [[ ! -f share.env ]]; then
   if [[ -f share.env.example ]]; then
     cp share.env.example share.env
     echo ""
@@ -18,12 +26,11 @@ if [[ ! -f share.env ]]; then
   echo "错误: 缺少 share.env，且找不到 share.env.example"
   exit 1
 fi
-if grep -qE '^GOOGLE_API_KEY=(请粘贴私下收到的密钥|你的密钥|)$' share.env; then
+elif grep -qE '^GOOGLE_API_KEY=(请粘贴私下收到的密钥|你的密钥|)$' share.env; then
   echo ""
   echo "请先在 share.env 中填写 GOOGLE_API_KEY（向仓库所有者索取），再重新运行本脚本。"
   exit 1
-fi
-if [[ ! -f .env ]]; then
+else
   cp share.env .env
   echo "    已从 share.env 生成 .env"
 fi
