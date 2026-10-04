@@ -1,5 +1,6 @@
 .env
 .env.local
+share.env
 .venv/
 uploads/
 __pycache__/
