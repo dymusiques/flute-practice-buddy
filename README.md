@@ -2,7 +2,7 @@
 
 上传乐谱 PDF + 演奏录音，自动识谱、分析节奏/音准/音质，展示扣分明细与谱面定位。
 
-**仓库（公开）：** https://github.com/dymusiques/flute-practice-buddy
+**仓库：** [GitHub（公开）](https://github.com/dymusiques/flute-practice-buddy) · [Origin](https://origin.cursor.com/danying/flute-practice-buddy)
 
 ---
 
@@ -11,7 +11,9 @@
 **前置：** Python 3.11+、Node.js 18+，以及仓库所有者**私下发来的 Google API Key**。
 
 ```bash
-git clone https://github.com/dymusiques/flute-practice-buddy.git
+# Origin 优先；失败则用 GitHub
+git clone https://origin.cursor.com/danying/flute-practice-buddy.git flute-practice-buddy || \
+  git clone https://github.com/dymusiques/flute-practice-buddy.git flute-practice-buddy
 cd flute-practice-buddy
 cp share.env.example share.env
 # 编辑 share.env，把 GOOGLE_API_KEY 换成私下收到的密钥
